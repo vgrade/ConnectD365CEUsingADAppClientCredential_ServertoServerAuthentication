@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System;
 using System.Linq;
 using System.Net.Http;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;//make sure version is 3.13.5.907 otherwise authority url got changed
 
-namespace ConnectCRMUsingadapp_CLientCredentialGrant
+namespace ConnectCRMUsingadapp_ClientCredentialGrant
 {
+    //Change urls and appid accoridng to yours
     class Program
     {
         private static readonly string API_URL = "https://vgrade2.api.crm8.dynamics.com/api/data/v9.1/";
         private static readonly string CLIENT_ID = "f3a73937-1f45-43f5-b4cc-a0fa3ea53078";
-        private static readonly string CLIENT_SECRET = "xr549Q=Mr?j8aWcnuNSoEhy]aSiMGik/";
+        private static readonly string CLIENT_SECRET = "<yoursecret>";
         static void Main(string[] args)
         {
             var execute = Task.Run(async () => await Auth());
@@ -23,9 +20,19 @@ namespace ConnectCRMUsingadapp_CLientCredentialGrant
 
         public static async Task Auth()
         {
-            AuthenticationParameters ap = AuthenticationParameters.CreateFromResourceUrlAsync(
-            new Uri(API_URL)).Result;
-            AuthenticationContext authContext = new AuthenticationContext(ap.Authority);
+            // use below lines for old version (3.13.5)  of adal library
+            //    AuthenticationParameters ap = AuthenticationParameters.CreateFromResourceUrlAsync(
+            //    new Uri(API_URL)).Result;
+
+            //Use below lines for latest version of adal library
+            AuthenticationParameters ap = AuthenticationParameters.CreateFromUrlAsync(
+           new Uri(API_URL)).Result; //for latest version of adal
+            
+            // use below lines for old version (3.13.5)  of adal library
+            //AuthenticationContext authContext = new AuthenticationContext(ap.Authority);
+
+            //Use below lines for latest version of adal library
+            AuthenticationContext authContext = new AuthenticationContext("https://login.microsoftonline.com/<yourtenantid>");
             var clinetCredential = new ClientCredential(CLIENT_ID, CLIENT_SECRET);
             var token = authContext.AcquireTokenAsync(ap.Resource, clinetCredential).Result.AccessToken;
             using (HttpClient httpClient = new HttpClient())
